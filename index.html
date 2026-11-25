@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Train what you’ve got</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#F2F1EE;--panel:#fff;--hero:#E8EAF8;--ink:#1A1D29;--mut:#62667A;--line:#E0DED8;--acc:#3A4BFF;--acc2:#9FA8FF;--base:#E4E1DB;--tap:#CDD2F4;--ghost:#B3B0A8;--onacc:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12131A;--panel:#1C1E29;--hero:#191B2B;--ink:#ECEDF5;--mut:#9A9FB5;--line:#2C2F3E;--acc:#7C89FF;--acc2:#4A53B8;--base:#2B2D3A;--tap:#363B66;--ghost:#555867;--onacc:#10121C;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12131A;--panel:#1C1E29;--hero:#191B2B;--ink:#ECEDF5;--mut:#9A9FB5;--line:#2C2F3E;--acc:#7C89FF;--acc2:#4A53B8;--base:#2B2D3A;--tap:#363B66;--ghost:#555867;--onacc:#10121C;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 Figtree,system-ui,sans-serif}
+main{max-width:1120px;margin:0 auto;padding:16px 16px 56px}
+h1,h2,h3{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif;margin:0;letter-spacing:-.02em}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.hero{background:var(--hero);border-radius:30px;padding:28px 24px 20px;display:grid;gap:12px;grid-template-columns:1fr;align-items:center}
+.hero h1{font-size:clamp(34px,6vw,60px);font-weight:800;line-height:1}
+.hero p{color:var(--mut);max-width:38ch;margin:12px 0 16px}
+#focus{min-height:40px}
+.hint{color:var(--mut);font-weight:500}
+.pill{display:inline-flex;align-items:center;gap:8px;background:var(--acc);color:var(--onacc);border:0;border-radius:999px;padding:8px 14px;font-weight:600}
+.figs{display:flex;justify-content:center;gap:clamp(8px,4vw,40px)}
+figure{margin:0;text-align:center}
+figcaption{color:var(--mut);font-size:14px;margin-top:4px}
+.figs svg{height:clamp(280px,46vh,440px);width:auto;display:block;--sk:var(--hero);overflow:visible}
+@media(min-width:820px){.hero{grid-template-columns:1fr 1.15fr;padding:36px 44px 28px}}
+.b,.p{fill:var(--base);stroke:var(--ink);stroke-width:.7;stroke-linejoin:round}
+.tap{fill:var(--tap);cursor:pointer;transition:fill .15s}
+.tap:hover{fill:var(--acc2)}
+.sel,.a2{fill:var(--acc)!important}
+.a1{fill:var(--acc2)}
+.gh{fill:none;stroke:var(--ghost);stroke-width:1;stroke-dasharray:2 2.5}
+[data-m]:focus-visible{outline:none;stroke:var(--ink);stroke-width:1.6}
+.ctl{display:grid;gap:16px;margin:16px 0 28px}
+@media(min-width:820px){.ctl{grid-template-columns:1fr 1fr}}
+.pn{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:20px}
+.pn h2{font-size:20px;margin-bottom:6px}
+.sm{color:var(--mut);font-size:14px;margin:0 0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:disabled{cursor:default;opacity:.7}
+.lnk{background:none;border:0;color:var(--acc);padding:7px 4px;font-weight:600}
+.missing-toggle{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer}.missing-toggle input{width:18px;height:18px;accent-color:var(--acc)}.limb-options{margin-top:12px}.lr{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:6px 0}
+.lr span{font-weight:600;min-width:84px}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:3px}
+.seg button{border:0;background:transparent;border-radius:9px;padding:6px 10px;font-size:14px}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--onacc);font-weight:600}
+.rh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.rh h2{font-size:26px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:20px 22px 16px;cursor:pointer}.card.open{grid-column:1/-1}.top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;min-height:155px}.top:focus-visible{outline:2px solid var(--acc);outline-offset:4px;border-radius:8px}
+.card h3{font-size:25px;line-height:1.12;letter-spacing:-.035em;margin:0 62px 8px 0}
+.mu{color:var(--mut);font-size:16px;line-height:1.45;margin:8px 0 12px}
+.mu b{color:var(--ink);font-weight:600}
+.tg{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
+.tg em{font-style:normal;font-size:14px;background:var(--bg);border-radius:10px;padding:5px 11px}
+.lv{display:inline-flex;gap:3px}
+.ds{margin:4px 0 0;font-size:14px}
+.ld{grid-column:1/-1;margin:0}
+.df{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut);margin-top:12px}
+.vd{grid-column:1/-1;display:grid;gap:8px}.vw{width:100%;max-width:520px;aspect-ratio:16/9;background:var(--bg);border-radius:14px;overflow:hidden}.vw video,.vw iframe{display:block;width:100%;height:100%;border:0;object-fit:contain}.vd a{color:var(--acc);font-weight:600}
+.sb{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px}.sb:focus-visible{outline:2px solid var(--acc)}
+.sr {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:18px;
+  align-items:center;
+}
+
+.sr .sb {
+  margin:0;
+  flex:1 1 220px;
+  width:auto;
+}
+
+.sort-wrap {
+  position:relative;
+  flex:0 1 260px;
+  min-width:220px;
+}
+
+.sort-wrap select {
+  appearance:none;
+  -webkit-appearance:none;
+  width:100%;
+  min-height:48px;
+  padding:11px 44px 11px 42px;
+  border-radius:15px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--ink);
+  font:500 15px Figtree,system-ui,sans-serif;
+  cursor:pointer;
+  box-shadow:0 2px 5px rgba(0,0,0,.035);
+  transition:border-color .2s, box-shadow .2s;
+}
+
+.sort-wrap select:hover {
+  border-color:var(--acc2);
+}
+
+.sort-wrap select:focus-visible {
+  outline:none;
+  border-color:var(--acc);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 18%,transparent);
+}
+
+.sort-icon {
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--acc);
+  font-size:19px;
+  pointer-events:none;
+}
+
+.sort-arrow {
+  position:absolute;
+  right:17px;
+  top:46%;
+  width:9px;
+  height:9px;
+  border-right:2px solid var(--mut);
+  border-bottom:2px solid var(--mut);
+  transform:translateY(-65%) rotate(45deg);
+  pointer-events:none;
+}
+
+@media(max-width:600px) {
+  .sort-wrap {
+    flex:1 1 100%;
+  }
+
+  .sr .sb {
+    flex:1 1 100%;
+  }
+}.lv i{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.lv i.on{background:var(--acc)}
+.card svg{width:140px;max-width:35%;height:auto;flex:none;align-self:flex-start;--sk:var(--panel)}
+.card:has(.doable) .top>svg{margin-top:48px}
+.card{position:relative;display:flex;flex-direction:column}
+.top{padding-right:0;margin-bottom:16px}
+.top>div:first-child{flex:1;min-width:0}
+.doable{
+  --score:100;
+  position:absolute;top:12px;right:14px;
+  width:50px;height:50px;flex:none;display:grid;place-items:center;
+  border-radius:50%;
+  background:radial-gradient(circle,var(--panel) 0 59%,transparent 61%),
+    conic-gradient(from -90deg,hsl(calc(var(--score)*1.2) 78% 55%) calc(var(--score)*1%),var(--line) 0);
+  transition:background .35s ease;
+}
+.doable strong{font-size:14px;font-weight:500;line-height:1}
+.bar{height:10px;border-radius:99px;background:var(--bg);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:99px;transition:width .3s}
+.bl{display:flex;justify-content:space-between;font-size:14px;color:var(--mut);margin-top:8px}
+.more{display:grid;gap:12px;margin-top:0;margin-bottom:16px;padding-top:14px;border-top:1px solid var(--line);cursor:default}
+.goal{margin-top:auto;padding-top:16px;border-top:1px solid var(--line)}
+.gi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;cursor:default}
+.gi label{display:grid;gap:4px;font-size:13px;color:var(--mut);font-weight:500}
+.gi input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:9px 12px;width:100%}
+.gi input:focus-visible{outline:2px solid var(--acc)}
+.pp{font-weight:600;color:var(--ink)}
+.nd{margin-top:22px}.nd summary{cursor:pointer;font-weight:600;color:var(--mut);padding:10px 4px}.nd .grid{margin-top:12px}
+.tg em.ms{background:transparent;border:1px dashed var(--mut)}.tg em.rlt{background:var(--acc);color:var(--onacc)}
+.note{grid-column:1/-1;margin:0;font-size:13px;color:var(--mut)}
+.empty{grid-column:1/-1;text-align:center;padding:40px 16px;color:var(--mut)}
+@media(max-width:560px){
+  .card{padding:16px 16px 14px;border-radius:22px}
+  .top{gap:8px;min-height:135px}
+  .card h3{font-size:21px;margin-right:58px}
+  .card svg{width:112px}
+  .card:has(.doable) .top>svg{margin-top:38px}
+  .mu{font-size:14px}
+  .doable{width:44px;height:44px;top:10px;right:10px}
+  .doable strong{font-size:12px}
+  .df{font-size:14px;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+.site-header{max-width:1120px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;z-index:20}
+.site-brand{font-family:"Bricolage Grotesque",Figtree,system-ui,sans-serif;font-size:18px;font-weight:800;letter-spacing:-.03em}
+.site-account{position:relative;display:flex;align-items:center;gap:10px}
+.site-account .account{position:absolute;right:0;top:calc(100% + 10px);width:min(420px,calc(100vw - 32px));margin:0;padding:18px;background:var(--panel);box-shadow:0 12px 36px rgba(0,0,0,.14)}
+.site-account .account-status{white-space:nowrap}
+.site-account .account-status[hidden]{display:none}
+.account[hidden]{display:none}
+@media(max-width:480px){.site-brand{font-size:16px}.site-account .account-status{font-size:11px;padding:5px 8px}}
+
+/* Account panel */
+.account {
+  margin: 16px 0;
+}
+
+.account-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.account-status {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.auth-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.auth-fields input {
+  min-width: 0;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+
+.auth-fields input:focus {
+  outline: 2px solid var(--acc);
+  outline-offset: 2px;
+}
+
+.auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#authMessage {
+  margin: 12px 0 0;
+}
+
+@media(max-width:600px) {
+  .auth-fields {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="site-brand">Train what you’ve got</div>
+  <div class="site-account">
+    <span id="accountStatus" class="account-status" hidden>Not signed in</span>
+    <button class="pill" id="accountToggle" type="button">Sign in</button>
+    <section class="pn account" id="accountPanel" hidden>
+      <div class="account-head">
+        <div><h2>Your account</h2><p class="sm">Save your workouts and access them on any device.</p></div>
+      </div>
+      <div id="authForms">
+        <div class="auth-fields">
+          <input id="authEmail" type="email" placeholder="Email address" autocomplete="email">
+          <input id="authPassword" type="password" placeholder="Password (at least 6 characters)" autocomplete="current-password">
+        </div>
+        <div class="auth-actions">
+          <button class="pill" id="signInBtn" type="button">Sign in</button>
+          <button class="chip" id="signUpBtn" type="button">Create account</button>
+        </div>
+      </div>
+      <div id="signedIn" hidden><p id="signedInEmail" class="sm"></p></div>
+      <p id="authMessage" class="sm" aria-live="polite"></p>
+    </section>
+  </div>
+</header>
+<main>
+<header class="hero">
+  <div>
+    <h1>Train what you’ve got</h1>
+    <p>Tap a muscle to focus the list. Set your equipment, and mark any limb difference so the map and workouts fit your body.</p>
+    <div id="focus"></div>
+
+  </div>
+  <div class="figs">
+    <figure><svg id="front" viewBox="0 0 100 212" aria-label="Front muscle map"></svg><figcaption>Front</figcaption></figure>
+    <figure><svg id="back" viewBox="0 0 100 212" aria-label="Back muscle map"></svg><figcaption>Back</figcaption></figure>
+  </div>
+</header>
+
+<section class="ctl">
+  <div class="pn"><h2>Your equipment</h2><p class="sm">Only workouts you can do with this gear are shown.</p><div id="eq" class="chips"></div></div>
+  <div class="pn"><h2>Adapt the map</h2><p class="sm">Missing muscles fade out and every workout’s doable percentage updates to match. Left and right are the person’s own sides.</p><div id="lm"></div></div>
+</section>
+
+<section>
+  <div class="rh"><h2 id="cnt"></h2></div>
+  <div class="sr">
+    <input id="q" class="sb" type="search" placeholder="Search exercises, muscles or gear" aria-label="Search exercises" autocomplete="off">
+    <div class="sort-wrap">
+      <span class="sort-icon" aria-hidden="true">↕</span>
+      <select id="so" aria-label="Sort workouts"></select>
+      <span class="sort-arrow" aria-hidden="true"></span>
+    </div>  
+  </div>
+  <div id="grid" class="grid"></div>
+  <div id="nd"></div>
+</section>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDED8LzMB6YJ_1kkTtAdskDgY0h3BsJVmY",
+  authDomain: "muscleworkout.firebaseapp.com",
+  projectId: "muscleworkout",
+  storageBucket: "muscleworkout.firebasestorage.app",
+  messagingSenderId: "393307290204",
+  appId: "1:393307290204:web:47b53052e35c4597efc499"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const MN={chest:'Chest',shoulders:'Shoulders',biceps:'Biceps',triceps:'Triceps',forearms:'Forearms',abs:'Abs',back:'Back',lowback:'Lower back',glutes:'Glutes',quads:'Quads',hamstrings:'Hamstrings',calves:'Calves'};
+const EQ={bw:'Bodyweight',db:'Dumbbells',bb:'Barbell',kb:'Kettlebell',bd:'Bands',pu:'Pull-up bar',bn:'Bench'};
+const LEVEL=['','Beginner','Intermediate','Advanced'];
+const LIMBS=[['aL','Left arm',['Full','Below elbow','Above elbow']],['aR','Right arm',['Full','Below elbow','Above elbow']],['lL','Left leg',['Full','Below knee','Above knee']],['lR','Right leg',['Full','Below knee','Above knee']]];
+/* name|gear|muscles (first = main)|arms needed (g = grip)|legs needed (f = foot on ground)|level */
+const W=
+`Push-up||chest,triceps,shoulders,abs|2g|0|1
+Incline push-up|bn|chest,triceps,shoulders|2g|0|1
+Pike push-up||shoulders,triceps,chest|2g|0|2
+Bench dip|bn|triceps,chest,shoulders|2g|0|2
+Forearm plank||abs,shoulders,lowback|2|0|1
+Side plank||abs,shoulders|1|0|2
+Dead bug||abs|0|0|1
+Bicycle crunch||abs|0|0|1
+Seated leg raise||abs,quads|0|1|1
+Mountain climber||abs,shoulders,quads|2g|1|2
+Bird dog||lowback,glutes,abs,shoulders|1|1|1
+Superman||lowback,glutes,back|0|0|1
+Glute bridge||glutes,hamstrings|0|1|1
+Bodyweight squat||quads,glutes,hamstrings|0|2f|1
+Reverse lunge||quads,glutes,hamstrings|0|1f|2
+Single-leg Romanian deadlift||hamstrings,glutes,lowback|0|1f|2
+Calf raise||calves|0|1f|1
+Wall sit||quads,glutes|0|1f|1
+Bench step-up|bn|quads,glutes|0|1f|1
+Pull-up|pu|back,biceps,forearms|2g|0|3
+Dead hang|pu|forearms,back,shoulders|1g|0|1
+Hanging knee raise|pu|abs,forearms|2g|0|2
+Dumbbell bench press|db,bn|chest,triceps,shoulders|1g|0|2
+Dumbbell shoulder press|db|shoulders,triceps|1g|0|1
+Lateral raise|db|shoulders|1g|0|1
+Dumbbell curl|db|biceps,forearms|1g|0|1
+Hammer curl|db|biceps,forearms|1g|0|1
+Overhead triceps extension|db|triceps,shoulders|1g|0|1
+One-arm dumbbell row|db,bn|back,biceps,forearms|1g|0|1
+Goblet squat|db|quads,glutes,abs|1g|2f|1
+Dumbbell Romanian deadlift|db|hamstrings,glutes,lowback|1g|2f|2
+Farmer’s carry|db|forearms,shoulders,abs,back|1g|2f|1
+Barbell back squat|bb|quads,glutes,lowback,abs|2g|2f|3
+Barbell deadlift|bb|hamstrings,glutes,lowback,back,forearms|2g|2f|3
+Barbell bench press|bb,bn|chest,triceps,shoulders|2g|0|2
+Barbell row|bb|back,biceps,lowback|2g|2f|2
+Overhead press|bb|shoulders,triceps,abs|2g|2f|2
+Kettlebell swing|kb|glutes,hamstrings,lowback,shoulders|1g|2f|2
+Turkish get-up|kb|shoulders,abs,glutes,quads|1g|1f|3
+Kettlebell Russian twist|kb|abs|1g|0|1
+Band row|bd|back,biceps|1g|0|1
+Band chest press|bd|chest,triceps,shoulders|1g|0|1
+Band curl|bd|biceps,forearms|1g|0|1
+Band pallof press|bd|abs,shoulders|1g|0|1
+Band glute kickback|bd|glutes,hamstrings|0|1f|1
+Band seated leg extension|bd|quads|0|1|1
+Cuffed band curl|bd|biceps|1|0|1
+Cuffed band triceps pushdown|bd|triceps|1|0|1
+Strapped band row|bd|back,biceps|1|0|1
+Strapped band chest press|bd|chest,triceps,shoulders|1|0|1
+Cuffed band lateral raise|bd|shoulders|1r|0|1
+Isometric elbow curl hold||biceps|1|0|1
+Isometric triceps wall press||triceps|1|0|1
+Isometric shoulder wall press||shoulders|1r|0|1
+Side-lying hip abduction||glutes|0|1r|1
+Prone hip extension||glutes,hamstrings,lowback|0|1r|1
+Straight leg raise||quads,abs|0|1r|1
+Prone band hamstring curl|bd|hamstrings|0|1|1`.split('\n').map(l=>{const[n,e,m,a,g,d]=l.split('|');return{n,e:e?e.split(','):[],m:m.split(','),a,g,d:+d}});
+
+/* id, views, path for the screen-left half (mirrored for the right), limb group, limb level at which it is gone */
+const PARTS=[
+['knee','fb','M36 147C41 151 46 151 50 149V157C45 159 40 159 36 157Z','l',2],
+['hand','fb','M8.5 110C7 116 6.5 121 9 126C11 127 14 125 15 123C17 118 17 114 17.5 111C14 113 11 113 8.5 110Z','a',1],
+['foot','fb','M36 198C33 203 32 207 35 209C38 210 41 209 43 208C43 204 42 201 41 197Z','l',1],
+['back','b','M50 31C45 35 39 37 33 41C31 52 35 70 41 84C44 87 47 88 50 88Z',0,9],
+['lowback','b','M41 88C44 89 47 89 50 90V100C46 100 43 100 41 99C40 96 40 92 41 88Z',0,9],
+['glutes','b','M34 101C32 111 37 120 50 119V101C43 103 38 102 34 101Z',0,9],
+['chest','f','M34 41C40 38 46 39 50 42V62C45 66 38 65 33 59C31 53 32 46 34 41Z',0,9],
+['abs','f','M42 65Q41 65 41 66.5V72Q41 73 42 73H50V65ZM42 75Q41 75 41 76.5V82Q41 83 42 83H50V75ZM42 85Q41 85 41 86.5V93Q42 99 50 100V85Z',0,9],
+['abs','f','M32 61C31 71 33 83 36 93Q38 93 40 91C39 81 40 71 38 63Q35 62 32 61Z',0,9],
+['shoulders','fb','M34 40C27 36 20 40 19 50C18 55 19 58 21 59C26 58 30 55 33 50C35 46 36 43 34 40Z','a',9],
+['biceps','f','M20 56C17 64 15 73 14.5 80C18 83 23 83 26 81C27 73 29 65 31 58C27 58 23 58 20 56Z','a',2],
+['triceps','b','M20 56C17 64 15 73 14.5 80C18 83 23 83 26 81C27 73 29 65 31 58C27 58 23 58 20 56Z','a',2],
+['forearms','fb','M14.5 82C12 92 10 101 8.5 109C11 113 15 113 17.5 111C20 102 24 93 26 83C22 84 18 84 14.5 82Z','a',1],
+['quads','f','M35 101C31 112 31 130 36 148C40 152 46 152 50 150V104C44 106 38 105 35 101Z','l',2],
+['hamstrings','b','M34 121C31 133 32 143 36 151C41 153 46 153 50 152V120C43 122 38 122 34 121Z','l',2],
+['calves','fb','M36 157C33 168 33 182 36 194C38 196 41 196 41 195C44 184 45 168 43 157C41 158 38 158 36 157Z','l',1]];
+
+let st={
+  eq:new Set(['db','bb','kb','bd','pu','bn']),
+  a:{aL:0,aR:0,lL:0,lR:0},
+  limbMode:false,
+  sel:null,
+  q:'',
+  so:'doable'
+},pr={},open=new Set();
+
+let cloudUser = null;
+let cloudTimer = null;
+let cloudLoading = false;
+
+// Load existing local data
+try {
+  const s = JSON.parse(localStorage.getItem('wm1'));
+
+  if(s) {
+    st.eq = new Set(s.eq);
+    Object.assign(st.a,s.a || {});
+    st.limbMode = s.limbMode !== undefined
+      ? !!s.limbMode
+      : Object.values(st.a).some(value => Number(value) > 0);
+  }
+} catch(e) {}
+
+try {
+  pr = JSON.parse(localStorage.getItem('wmp')) || {};
+} catch(e) {}
+
+// Save locally
+function persistLocal() {
+  try {
+    localStorage.setItem('wm1',JSON.stringify({
+      eq:[...st.eq],
+      a:st.a,
+      limbMode:st.limbMode
+    }));
+
+    localStorage.setItem('wmp',JSON.stringify(pr));
+  } catch(e) {
+    console.error('Local save failed:',e);
+  }
+}
+
+// Save locally and to Firebase
+function save() {
+  persistLocal();
+
+  if(!cloudUser || cloudLoading) return;
+
+  clearTimeout(cloudTimer);
+
+  cloudTimer = setTimeout(async () => {
+    try {
+      await db.collection('users')
+        .doc(cloudUser.uid)
+        .set({
+          eq:[...st.eq],
+          a:st.a,
+          limbMode:st.limbMode,
+          pr:pr,
+          updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+        },{merge:true});
+
+      $('#accountStatus').textContent = 'Synced ✓';
+
+    } catch(error) {
+      console.error('Cloud save failed:',error);
+      $('#accountStatus').textContent = 'Sync error';
+      $('#authMessage').textContent =
+        'Could not sync your progress. Please check your connection.';
+    }
+  },500);
+}
+const $=s=>document.querySelector(s);
+const weighted=w=>w.e.some(e=>['db','bb','kb'].includes(e));
+const timed=w=>/plank|hang|Wall sit/.test(w.n);
+const unit=w=>timed(w)?'sec':'reps';
+const prog=w=>{
+  const p={...(pr[w.n]||{})};
+  if(weighted(w)){
+    // Older versions stored the single PB/goal as kilograms for weighted exercises.
+    if(p.weightPb==null&&p.pb!=null)p.weightPb=p.pb;
+    if(p.weightGoal==null&&p.goal!=null)p.weightGoal=p.goal;
+    const vals=[];
+    if(+p.repGoal>0)vals.push(Math.min(100,100*(+p.repPb||0)/+p.repGoal));
+    if(+p.weightGoal>0)vals.push(Math.min(100,100*(+p.weightPb||0)/+p.weightGoal));
+    const pct=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null;
+    const txt=vals.length?`${p.repPb||0} reps${p.repGoal?` / ${p.repGoal} goal`:''} · ${p.weightPb||0} kg${p.weightGoal?` / ${p.weightGoal} kg goal`:''}`:'Tap to set reps and weight goals';
+    return{u:'reps',p,pct,txt,weighted:true};
+  }
+  const pct=p.goal>0?Math.min(100,Math.round(100*(p.pb||0)/p.goal)):null;
+  return{u:unit(w),p,pct,txt:p.goal>0?`${p.pb||0} of ${p.goal} ${unit(w)}`:'Tap to set a goal',weighted:false};
+};
+
+const DESC={"Push-up": ["Classic pressing move from the floor.", "Hands under your shoulders, body in a straight line. Lower your chest to the floor, then press back up. Keep your core tight and don’t let the hips sag."], "Incline push-up": ["Push-up with your hands raised on a bench.", "Hands on the bench edge, body straight. Lower your chest to the bench and press away. Easier on the shoulders than the floor version."], "Pike push-up": ["Shoulder-focused push-up with your hips high.", "Start in an inverted V with hips up. Bend your elbows to lower your head toward the floor, then press back. Keep your hips high throughout."], "Bench dip": ["Triceps dip with your hands on a bench.", "Hands on the bench behind you, legs out in front. Bend your elbows to lower your body, then press back up. Keep your back close to the bench."], "Forearm plank": ["Static core hold on your forearms.", "Forearms on the floor, elbows under shoulders. Hold your body in one straight line, squeezing your abs and glutes. Don’t let your hips drop or rise."], "Side plank": ["Sideways hold that targets the obliques.", "Lie on your side, propped on one forearm. Lift your hips so your body forms a straight line, and hold. Keep your hips high and your neck relaxed."], "Dead bug": ["Slow core drill lying on your back.", "Lie on your back with your arms up and knees bent at 90°. Lower the opposite arm and leg toward the floor, keeping your lower back flat, then switch. Move whichever limbs you have."], "Bicycle crunch": ["Twisting crunch for abs and obliques.", "Lie on your back with your hands behind your head. Bring one elbow toward the opposite knee as you extend the other leg, then alternate in a pedalling motion."], "Seated leg raise": ["Seated ab move you can do from a chair.", "Sit tall and hold the seat. Lift your knees toward your chest, then lower with control. Lean back slightly to make it harder."], "Mountain climber": ["Fast core and cardio move from plank position.", "Start in a high plank. Drive one knee toward your chest, then switch legs quickly, keeping your hips low and your core braced."], "Bird dog": ["Balance drill for your core and lower back.", "On hands and knees, extend one arm forward and the opposite leg back, hold briefly, then switch. Keep your back flat and your hips level."], "Superman": ["Lie-down lift for your lower back.", "Lie face down with your arms out front. Lift your arms, chest and legs off the floor together, pause, then lower slowly."], "Glute bridge": ["Hip lift for glutes and hamstrings.", "Lie on your back with knees bent and feet flat. Push through your heels to lift your hips until your body is straight from shoulders to knees, then lower."], "Bodyweight squat": ["Basic squat using only your bodyweight.", "Feet shoulder-width apart. Sit your hips back and down until your thighs are about parallel, then drive up through your heels. Keep your chest up."], "Reverse lunge": ["Step-back lunge that’s gentle on the knees.", "Step one foot back and lower until both knees bend to about 90°. Push through the front foot to return to standing, then repeat on the other side."], "Single-leg Romanian deadlift": ["One-legged hip hinge for hamstrings and balance.", "Stand on one leg and hinge forward at the hips as the other leg lifts behind you. Keep your back flat, then squeeze your glutes to stand tall."], "Calf raise": ["Rise onto your toes to work the calves.", "Stand tall and press through the balls of your feet to lift your heels as high as you can. Pause, then lower slowly. Hold a wall for balance."], "Wall sit": ["Static squat hold against a wall.", "Slide your back down a wall until your thighs are parallel to the floor, with knees over ankles. Hold the position and breathe steadily."], "Bench step-up": ["Step onto a bench to build leg strength.", "Place one foot fully on the bench and drive through it to stand up, then step back down with control. Switch legs after your reps."], "Pull-up": ["Pull your chin over a bar using your back and arms.", "Hang from the bar, then pull your elbows down and back until your chin clears it. Lower slowly to a full hang. Avoid swinging."], "Dead hang": ["Hang from a bar for grip and shoulder health.", "Grip the bar and hang with straight arms, shoulders gently pulled down away from your ears. Hold for time and breathe steadily."], "Hanging knee raise": ["Hanging ab move lifting your knees up.", "Hang from the bar and lift your knees toward your chest by curling your pelvis up. Lower slowly without swinging."], "Dumbbell bench press": ["Press a dumbbell up while lying on a bench.", "Lie on the bench with a dumbbell at chest level. Press it straight up until your arm is extended, then lower with control."], "Dumbbell shoulder press": ["Overhead press that builds the shoulders.", "Hold a dumbbell at shoulder height, seated or standing. Press it overhead until your arm is straight, then lower it back to your shoulder."], "Lateral raise": ["Raise the weight out to the side for shoulder width.", "With a dumbbell by your side, lift your arm out to shoulder height with a slight bend in the elbow, then lower slowly."], "Dumbbell curl": ["Classic biceps curl.", "Hold a dumbbell with your palm facing forward. Curl it up toward your shoulder without swinging, then lower slowly."], "Hammer curl": ["Neutral-grip curl for biceps and forearms.", "Hold the dumbbell with your palm facing in, like a hammer. Curl it up, keeping your elbow by your side, then lower slowly."], "Overhead triceps extension": ["Lower a dumbbell behind your head for the triceps.", "Hold one dumbbell overhead. Bend your elbow to lower it behind your head, then straighten your arm. Keep your elbow pointing up."], "One-arm dumbbell row": ["Supported row for your back and biceps.", "Rest a hand and knee on the bench with a dumbbell in your other hand. Pull it toward your hip, squeeze your back, then lower slowly."], "Goblet squat": ["Squat holding a weight at your chest.", "Hold a dumbbell at your chest. Sit down between your hips with your chest tall, then stand back up. The weight helps you stay upright."], "Dumbbell Romanian deadlift": ["Hip hinge for hamstrings and glutes.", "Hold a dumbbell in front of your thighs. Push your hips back, sliding the weight down your legs with a flat back, then stand tall."], "Farmer’s carry": ["Walk while holding a heavy weight.", "Hold a heavy dumbbell by your side, stand tall, and walk with controlled steps. It challenges your grip, core and posture."], "Barbell back squat": ["The classic barbell leg builder.", "Rest the bar across your upper back. Squat down until your thighs are about parallel, then drive up. Keep your chest up and your core braced."], "Barbell deadlift": ["Lift a barbell from the floor to standing.", "With the bar over mid-foot, hinge down and grip it. Keep your back flat and push the floor away until you stand tall, then lower with control."], "Barbell bench press": ["The classic horizontal chest press.", "Lie on the bench, lower the bar to mid-chest with control, then press it back up. Keep your feet planted and shoulder blades pulled back."], "Barbell row": ["Bent-over pull for the whole back.", "Hinge forward with a flat back and the bar hanging. Pull it to your lower ribs, squeeze your back, then lower slowly."], "Overhead press": ["Press a barbell from your shoulders overhead.", "Start with the bar at shoulder height. Press it straight overhead, moving your head through at the top, then lower back to your shoulders."], "Kettlebell swing": ["Explosive hip hinge for glutes and hamstrings.", "Hinge back and swing the kettlebell between your legs, then snap your hips forward to float it to chest height. Power comes from your hips, not your arms."], "Turkish get-up": ["Slow full-body move from lying to standing.", "From lying down with a kettlebell pressed up, move in stages to standing while keeping the weight overhead. It builds shoulders, core and stability. Start light."], "Kettlebell Russian twist": ["Seated twist for the obliques.", "Sit leaning back slightly, holding a kettlebell at your chest. Rotate your torso side to side, keeping your chest tall."], "Band row": ["Pull a resistance band toward your ribs.", "Anchor the band in front of you, pull the handle toward your ribs, squeeze your shoulder blade back, then return slowly."], "Band chest press": ["Press a band forward to work the chest.", "Anchor the band behind you. Press the handle straight out from chest height until your arm is extended, then return with control."], "Band curl": ["Biceps curl using a band for resistance.", "Stand on the band and curl the handle toward your shoulder, keeping your elbow by your side, then lower slowly."], "Band pallof press": ["Anti-rotation core exercise.", "Stand side-on to an anchored band with the handle at your chest. Press it straight out, resist the pull to rotate, then bring it back in."], "Band glute kickback": ["Kick back against a band to fire the glutes.", "Anchor the band low, loop it around your ankle, and kick your leg straight back, squeezing your glutes, then return slowly."], "Band seated leg extension": ["Straighten your knee against a band for the quads.", "Seated, loop a band around your ankle and anchor it behind you. Straighten your leg fully, pause, then lower slowly."],"Cuffed band curl":["Biceps curl with the band on your forearm, no grip.", "Loop a resistance band (or use a cuff or strap) around your forearm or wrist and anchor the other end under your foot. Curl your forearm up toward your shoulder, then lower slowly. No hand needed."],"Cuffed band triceps pushdown":["Triceps push with a band strapped to your forearm.", "Anchor a band high, such as over a door, and loop it around your forearm. Keep your elbow tucked and straighten your arm downward, then return slowly. No grip needed."],"Strapped band row":["Back row with the band strapped to your forearm.", "Anchor a band in front of you and loop it around your forearm. Pull your elbow back past your ribs, squeeze your shoulder blade, then return slowly."],"Strapped band chest press":["Chest press with a strap, no hand needed.", "Anchor a band behind you and loop it around your forearm. Press forward from chest height until your arm is straight, then return with control."],"Cuffed band lateral raise":["Shoulder raise that works with any arm length.", "Stand on a band with a loop or cuff around your arm (forearm or upper arm). Lift your arm out to shoulder height, then lower slowly. Works for above-elbow limbs too."],"Isometric elbow curl hold":["Press up under a table to train the biceps, no gear.", "Sit at a sturdy table with your forearm under the edge and your elbow bent at 90°. Press up into the table as if curling, hold for time while breathing steadily, then ease off gently."],"Isometric triceps wall press":["Press your arm into a wall to wake up the triceps.", "Stand facing a wall with your forearm or elbow against it at chest height. Straighten your arm to push into the wall, hold for time, then relax."],"Isometric shoulder wall press":["Press your arm into a wall to train the shoulder.", "Stand side-on to a wall with your arm bent and press the outside of your arm into it, as if lifting sideways. Hold for time, then release. Works with any arm length."],"Side-lying hip abduction":["Lift your top leg sideways to work the glutes.", "Lie on your side with your hips stacked. Lift your top leg slightly behind your body, keeping your toes forward, then lower slowly. Works with a residual limb too."],"Prone hip extension":["Lift a leg off the floor lying face down.", "Lie face down with your arms under your head. Squeeze your glutes and lift one leg a few inches off the floor, then lower slowly. Keep your hips pressed down."],"Straight leg raise":["Lift your leg off the floor for the quads and hip.", "Lie on your back with one knee bent and the other leg straight. Tighten your thigh and lift the straight leg to the height of the bent knee, then lower slowly. Works with a residual limb too."],"Prone band hamstring curl":["Curl your lower leg back against a band.", "Lie face down with a band anchored in front of you and looped around your ankle or residual limb. Bend your knee to bring your heel toward your glutes, then lower slowly."]};
+
+/* ===================== Video here =====================
+   For each exercise, paste a MuscleWiki video link (an .mp4 URL) or a YouTube embed code
+   between the backticks. Clips play muted on a loop, all at the same size, when the card is expanded. */
+const VIDEOS={
+'Push-up':`https://musclewiki.com/api-next/videos/male-Bodyweight-push-up-side.mp4`,
+'Incline push-up':`https://musclewiki.com/api-next/videos/male-Bodyweight-incline-push-up-side.mp4`,
+'Pike push-up':``, // YouTube video here
+'Bench dip':`https://musclewiki.com/api-next/videos/male-Bodyweight-bench-dips-side.mp4`, // YouTube video here
+'Forearm plank':``, // YouTube video here
+'Side plank':``, // YouTube video here
+'Dead bug':`https://musclewiki.com/api-next/videos/male-Bodyweight-dead-bug-side.mp4`, // YouTube video here
+'Bicycle crunch':`https://musclewiki.com/api-next/videos/male-Bodyweight-bodyweight-bicycle-crunch-side.mp4`, // YouTube video here
+'Seated leg raise':``, // YouTube video here
+'Mountain climber':``, // YouTube video here
+'Bird dog':`https://musclewiki.com/api-next/videos/male-Bodyweight-bird-dog-side.mp4`, // YouTube video here
+'Superman':``, // YouTube video here
+'Glute bridge':``, // YouTube video here
+'Bodyweight squat':`https://musclewiki.com/api-next/videos/male-Bodyweight-bodyweight-squat-side.mp4`, // YouTube video here
+'Reverse lunge':``, // YouTube video here
+'Single-leg Romanian deadlift':``, // YouTube video here
+'Calf raise':`https://musclewiki.com/api-next/videos/male-Bodyweight-calf-raises-side.mp4`, // YouTube video here
+'Wall sit':``, // YouTube video here
+'Bench step-up':`https://musclewiki.com/api-next/videos/male-Recovery-step-up-knee-drive-side.mp4`, // YouTube video here
+'Pull-up':``, // YouTube video here
+'Dead hang':`https://musclewiki.com/api-next/videos/male-Bodyweight-dead-hang-side.mp4`, // YouTube video here
+'Hanging knee raise':``, // YouTube video here
+'Dumbbell bench press':`https://musclewiki.com/api-next/videos/male-dumbbell-bench-press-side_rqe1iTe.mp4`, // YouTube video here
+'Dumbbell shoulder press':`https://musclewiki.com/api-next/videos/male-dumbbell-seated-overhead-press-front.mp4`, // YouTube video here
+'Lateral raise':`https://musclewiki.com/api-next/videos/male-Dumbbells-dumbbell-lateral-raise-front.mp4`, // YouTube video here
+'Dumbbell curl':`https://musclewiki.com/api-next/videos/male-Dumbbells-dumbbell-curl-side.mp4`, // YouTube video here
+'Hammer curl':``, // YouTube video here
+'Overhead triceps extension':`https://musclewiki.com/api-next/videos/male-Dumbbells-dumbbell-seated-overhead-tricep-extension-side.mp4`, // YouTube video here
+'One-arm dumbbell row':`https://musclewiki.com/api-next/videos/male-Dumbbells-dumbbell-single-arm-row-front.mp4`, // YouTube video here
+'Goblet squat':`https://musclewiki.com/api-next/videos/male-dumbbell-goblet-squat-side.mp4`, // YouTube video here
+'Dumbbell Romanian deadlift':`https://musclewiki.com/api-next/videos/male-Dumbbells-dumbbell-romanian-deadlift-side.mp4`, // YouTube video here
+'Farmer’s carry':`https://musclewiki.com/api-next/videos/male-Kettlebells-kettlebell-farmers-carry-front.mp4`, // YouTube video here
+'Barbell back squat':`https://musclewiki.com/api-next/videos/male-Barbell-barbell-squat-side.mp4`, // YouTube video here
+'Barbell deadlift':`https://musclewiki.com/api-next/videos/male-Barbell-barbell-deadlift-side.mp4`, // YouTube video here
+'Barbell bench press':`https://musclewiki.com/api-next/videos/male-barbell-bench-press-side_KciuhbB.mp4`, // YouTube video here
+'Barbell row':`https://musclewiki.com/api-next/videos/male-Barbell-barbell-upright-row-side.mp4`, // YouTube video here
+'Overhead press':`https://musclewiki.com/api-next/videos/male-Barbell-barbell-overhead-press-side.mp4`, // YouTube video here
+'Kettlebell swing':`https://musclewiki.com/api-next/videos/male-Kettlebells-kettlebell-swing-side.mp4`, // YouTube video here
+'Turkish get-up':``, // YouTube video here
+'Kettlebell Russian twist':`https://musclewiki.com/api-next/videos/male-Kettlebells-kettlebell-russian-twist-side.mp4`, // YouTube video here
+'Band row':`https://musclewiki.com/api-next/videos/male-Band-band-row-front.mp4`, // YouTube video here
+'Band chest press':`https://musclewiki.com/api-next/videos/male-band-chest-press-side_vYKZsWt.mp4`, // YouTube video here
+'Band curl':`https://musclewiki.com/api-next/videos/male-band-curl-side_qegXZDv.mp4`, // YouTube video here
+'Band pallof press':`https://musclewiki.com/api-next/videos/male-Band-band-pallof-press-side.mp4`, // YouTube video here
+'Band glute kickback':`https://musclewiki.com/api-next/videos/male-Band-band-glute-kickback-front.mp4`, // YouTube video here
+'Band seated leg extension':`https://musclewiki.com/api-next/videos/male-Cables-cable-seated-leg-extension-side.mp4`, // YouTube video here
+'Cuffed band curl':``, // video here
+'Cuffed band triceps pushdown':``, // video here
+'Strapped band row':``, // video here
+'Strapped band chest press':``, // video here
+'Cuffed band lateral raise':``, // video here
+'Isometric elbow curl hold':``, // video here
+'Isometric triceps wall press':``, // video here
+'Isometric shoulder wall press':``, // video here
+'Side-lying hip abduction':``, // video here
+'Prone hip extension':``, // video here
+'Straight leg raise':``, // video here
+'Prone band hamstring curl':``, // video here
+};
+const vid=w=>{const v=(VIDEOS[w.n]||'').trim();if(!v)return'';
+  const f=v.match(/https?:\/\/[^\s"'<>]+?\.(?:mp4|webm|mov)(?:\?[^\s"'<>]*)?/i);
+  if(f)return `<div class="vd"><div class="vw"><video src="${f[0]}" autoplay muted loop playsinline preload="metadata" aria-label="${w.n} demonstration"></video></div></div>`;
+  const m=v.match(/(?:embed\/|v=|youtu\.be\/)([\w-]{11})/),id=m&&m[1];
+  return `<div class="vd">${v.includes('<iframe')?`<div class="vw">${v}</div>`:''}${id?`<a href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">Watch on YouTube</a>`:''}</div>`};
+
+function fig(view,act,hero){
+  let h='<ellipse class="b" cx="50" cy="14" rx="9" ry="11"/><path class="b" d="M45 24C45 30 44 33 40 36Q50 39 60 36C56 33 55 30 55 24Z"/><path class="b" d="M33 40Q50 33 67 40C68 55 66 70 64 85C63 93 62 98 62 100Q55 112 50 115Q45 112 38 100C38 98 37 93 36 85C34 70 32 55 33 40Z"/>';
+  for(const [id,v,d,g,lv] of PARTS){
+    if(!v.includes(view))continue;
+    for(const s of['l','r']){
+      const side=view==='f'?(s==='l'?'R':'L'):(s==='l'?'L':'R');
+      const tf=s==='r'?' transform="translate(100 0) scale(-1 1)"':'';
+      if(g&&st.a[g+side]>=lv){if(MN[id])h+=`<path class="gh" d="${d}"${tf}/>`;continue}
+      let cl='p',at='';
+      if(MN[id]){
+        if(hero){cl+=' tap'+(st.sel===id?' sel':'');at=` data-m="${id}" tabindex="0" role="button" aria-pressed="${st.sel===id}" aria-label="${MN[id]}"`}
+        else if(act[id])cl+=' a'+act[id];
+      }
+      h+=`<path class="${cl}" d="${d}"${tf}${at}/>`;
+    }
+  }
+  return h;
+}
+
+/* How doable each exercise is with the limbs selected: 0 = can't be done, 100 = no changes needed.
+   Per exercise: [fewest arms for any version, arms the standard version uses, % lost per missing arm,
+                  same three numbers for legs]. Grip (g) moves need a full arm, foot (f) moves a full leg.
+   Leaning on a below-elbow/knee limb for support costs another 10% each. */
+const RL=new Set(["Cuffed band curl", "Cuffed band triceps pushdown", "Strapped band row", "Strapped band chest press", "Cuffed band lateral raise", "Isometric elbow curl hold", "Isometric triceps wall press", "Isometric shoulder wall press", "Side-lying hip abduction", "Prone hip extension", "Straight leg raise", "Prone band hamstring curl"]); // moves that train the rest of a limb without needing a hand or foot
+const PROF={
+'Push-up':[2,2,30,0,2,5],'Incline push-up':[2,2,30,0,2,5],'Pike push-up':[2,2,30,0,2,10],'Bench dip':[2,2,30,0,2,5],
+'Forearm plank':[1,2,30,0,2,5],'Side plank':[1,1,0,0,2,5],'Dead bug':[0,2,5,0,2,5],'Bicycle crunch':[0,2,3,0,2,8],
+'Seated leg raise':[0,2,2,1,2,10],'Mountain climber':[2,2,30,1,2,20],'Bird dog':[1,2,25,1,2,15],'Superman':[0,2,3,0,2,3],
+'Glute bridge':[0,0,0,1,2,15],'Bodyweight squat':[0,0,0,1,2,40],'Reverse lunge':[0,0,0,2,2,0],
+'Single-leg Romanian deadlift':[0,0,0,1,2,15],'Calf raise':[0,0,0,1,2,12],'Wall sit':[0,0,0,1,2,25],'Bench step-up':[0,0,0,2,2,0],
+'Pull-up':[2,2,0,0,0,0],'Dead hang':[1,2,35,0,0,0],'Hanging knee raise':[2,2,0,1,2,10],
+'Dumbbell bench press':[1,2,25,0,2,5],'Dumbbell shoulder press':[1,2,15,0,0,0],'Lateral raise':[1,2,5,0,0,0],
+'Dumbbell curl':[1,2,5,0,0,0],'Hammer curl':[1,2,5,0,0,0],'Overhead triceps extension':[1,2,10,0,0,0],
+'One-arm dumbbell row':[1,2,20,0,0,0],'Goblet squat':[1,2,10,1,2,45],'Dumbbell Romanian deadlift':[1,2,10,1,2,25],
+'Farmer’s carry':[1,2,5,2,2,0],'Barbell back squat':[2,2,0,2,2,0],'Barbell deadlift':[2,2,0,2,2,0],
+'Barbell bench press':[2,2,0,0,2,5],'Barbell row':[2,2,0,2,2,0],'Overhead press':[2,2,0,0,2,15],
+'Kettlebell swing':[1,2,10,2,2,0],'Turkish get-up':[1,2,45,1,2,45],'Kettlebell Russian twist':[1,2,10,0,2,5],
+'Band row':[1,2,10,0,2,5],'Band chest press':[1,2,10,0,2,5],'Band curl':[1,2,5,0,1,5],'Band pallof press':[1,2,10,0,2,5],
+'Band glute kickback':[0,1,5,2,2,0],'Band seated leg extension':[0,0,0,1,2,10],
+'Cuffed band curl':[1,1,0,0,0,0],'Cuffed band triceps pushdown':[1,1,0,0,0,0],'Strapped band row':[1,1,0,0,0,0],'Strapped band chest press':[1,1,0,0,0,0],'Cuffed band lateral raise':[1,1,0,0,0,0],'Isometric elbow curl hold':[1,1,0,0,0,0],'Isometric triceps wall press':[1,1,0,0,0,0],'Isometric shoulder wall press':[1,1,0,0,0,0],'Side-lying hip abduction':[0,0,0,1,1,0],'Prone hip extension':[0,0,0,1,1,0],'Straight leg raise':[0,0,0,1,1,0],'Prone band hamstring curl':[0,0,0,1,1,0]};
+function scoreFor(w,a){
+  const [am,as,ap,lm,ls,lp]=PROF[w.n],ga=w.a.includes('g'),gl=w.g.includes('f'),ra=w.a.includes('r'),rl=w.g.includes('r'),res=RL.has(w.n);
+  const A=[a.aL,a.aR],L=[a.lL,a.lR];
+  const ca=A.filter(x=>x<=(ga?0:ra?2:1)).length,cl=L.filter(x=>x<=(gl?0:rl?2:1)).length;
+  if(ca<am||cl<lm)return 0;
+  let s=100-ap*Math.max(0,as-ca)-lp*Math.max(0,ls-cl);
+  if(!ga&&!res&&am)s-=10*Math.max(0,Math.min(as,ca)-A.filter(x=>!x).length);
+  if(!gl&&!res&&lm)s-=10*Math.max(0,Math.min(ls,cl)-L.filter(x=>!x).length);
+  return Math.max(5,Math.min(100,Math.round(s)));
+}
+function score(w){return st.limbMode?scoreFor(w,st.a):100}
+
+const SORTS={
+  doable:['Most doable first',(a,b)=>b.s-a.s],
+  doableLow:['Least doable first',(a,b)=>a.s-b.s],
+  easy:['Beginner first',(a,b)=>a.w.d-b.w.d],
+  hard:['Advanced first',(a,b)=>b.w.d-a.w.d],
+  bw:['Bodyweight first',(a,b)=>a.w.e.length-b.w.e.length],
+  gear:['Most equipment first',(a,b)=>b.w.e.length-a.w.e.length],
+  az:['A to Z',(a,b)=>a.w.n.localeCompare(b.w.n)],
+  za:['Z to A',(a,b)=>b.w.n.localeCompare(a.w.n)],
+  close:['Closest to goal',(a,b)=>(prog(b.w).pct??-1)-(prog(a.w).pct??-1)],
+  far:['Furthest from goal',(a,b)=>(prog(a.w).pct??101)-(prog(b.w).pct??101)],
+  muscle:['By muscle group',(a,b)=>MN[a.w.m[0]].localeCompare(MN[b.w.m[0]])]
+};
+const hit=w=>{const h=(w.n+' '+w.m.map(m=>MN[m]).join(' ')+' '+(w.e.length?w.e.map(e=>EQ[e]).join(' '):'Bodyweight')+' '+DESC[w.n][0]+(RL.has(w.n)?' residual limb':'')).toLowerCase();return st.q.toLowerCase().split(/\s+/).filter(Boolean).every(t=>h.includes(t))};
+let lastSig,ndOpen=false,gOpen=false;
+function render(){
+  const sig=JSON.stringify([st.sel,[...st.eq],st.a,st.limbMode,st.q,st.so]);if(lastSig!==undefined&&sig!==lastSig)open.clear();lastSig=sig;
+  $('#front').innerHTML=fig('f',{},true);
+  $('#back').innerHTML=fig('b',{},true);
+  $('#focus').innerHTML=st.sel
+    ?`<button class="pill" id="clr" aria-label="Clear ${MN[st.sel]} focus">${MN[st.sel]} <span aria-hidden="true">✕</span></button>`
+    :`<span class="hint" id="hint">Tap a muscle to focus</span>`;
+  $('#eq').innerHTML=Object.entries(EQ).map(([k,n])=>`<button class="chip" data-e="${k}" aria-pressed="${k==='bw'||st.eq.has(k)}" ${k==='bw'?'disabled':''}>${n}</button>`).join('')+`<button class="lnk" id="none">Bodyweight only</button>`;
+  $('#lm').innerHTML=`<label class="missing-toggle"><input type="checkbox" id="limbModeToggle" ${st.limbMode?'checked':''}> Missing a limb?</label>${st.limbMode?`<div class="limb-options">${LIMBS.map(([k,n,o])=>`<div class="lr"><span>${n}</span><div class="seg" role="group" aria-label="${n}">${o.map((x,i)=>`<button data-l="${k}" data-v="${i}" aria-pressed="${st.a[k]===i}">${x}</button>`).join('')}</div></div>`).join('')}</div>`:''}`;
+
+  const all=W.map((w,i)=>({w,i,s:score(w),miss:w.e.filter(e=>!st.eq.has(e))})).filter(o=>(!st.sel||o.w.m.includes(st.sel))&&hit(o.w))
+    .sort((a,b)=>SORTS[st.so][1](a,b)||((b.w.m[0]===st.sel)-(a.w.m[0]===st.sel))||b.s-a.s||a.w.n.localeCompare(b.w.n));
+  const list=all.filter(o=>!o.miss.length),more=all.filter(o=>o.miss.length&&o.miss.length<o.w.e.length&&o.s>0);
+  const doable=list.filter(o=>o.s>0),nope=list.filter(o=>!o.s);
+  $('#cnt').textContent=`${doable.length} doable ${doable.length===1?'workout':'workouts'}${st.sel?' for '+MN[st.sel].toLowerCase():''}`;
+  const cardHTML=({w,i,s,miss})=>{
+    const act={};w.m.forEach((m,j)=>act[m]=j?1:2);
+    const g=prog(w),o=open.has(i);
+    return `<article class="card${o?' open':''}" data-k="${i}">
+    ${st.limbMode?`<div class="doable" style="--score:${s}" title="${s}% doable"><strong>${s}%</strong></div>`:''}
+    <div class="top" role="button" tabindex="0" aria-expanded="${o}"><div><h3>${w.n}</h3><p class="ds">${DESC[w.n][0]}</p>
+    <p class="mu">${w.m.map((m,j)=>j?MN[m]:`<b>${MN[m]}</b>`).join(', ')}</p>
+    <div class="tg">
+  <em>${w.e.length?w.e.map(e=>EQ[e]).join(' + '):'Bodyweight'}</em>${miss&&miss.length?`<em class="ms">Needs ${miss.map(e=>EQ[e]).join(' + ')}</em>`:''}${RL.has(w.n)?'<em class="rlt">Works with a residual limb</em>':''}
+</div><div class="df">Difficulty <span class="lv" title="${LEVEL[w.d]}" aria-label="${LEVEL[w.d]}">${[1,2,3].map(j=>`<i class="${j<=w.d?'on':''}"></i>`).join('')}</span> ${LEVEL[w.d]}</div></div>
+    <svg viewBox="0 0 210 212" aria-hidden="true"><g>${fig('f',act)}</g><g transform="translate(110 0)">${fig('b',act)}</g></svg></div>
+    ${o?`<div class="more"><p class="ld">${DESC[w.n][1]}</p>${vid(w)}</div>`:''}
+    <div class="goal"><div class="bar"><i style="width:${g.pct||0}%"></i></div><div class="bl"><span class="pt">${g.txt}</span><span class="pp">${g.pct===null?'':g.pct+'%'}</span></div>
+    ${o?`<div class="gi">${g.weighted?`<label>Best reps<input type="number" inputmode="numeric" min="0" data-k="${i}" data-f="repPb" value="${g.p.repPb??''}"></label><label>Goal reps<input type="number" inputmode="numeric" min="0" data-k="${i}" data-f="repGoal" value="${g.p.repGoal??''}"></label><label>Best weight (kg)<input type="number" inputmode="decimal" min="0" step="any" data-k="${i}" data-f="weightPb" value="${g.p.weightPb??g.p.pb??''}"></label><label>Goal weight (kg)<input type="number" inputmode="decimal" min="0" step="any" data-k="${i}" data-f="weightGoal" value="${g.p.weightGoal??g.p.goal??''}"></label>`:`<label>Current best (${g.u})<input type="number" inputmode="decimal" min="0" data-k="${i}" data-f="pb" value="${g.p.pb??''}"></label><label>Goal (${g.u})<input type="number" inputmode="decimal" min="0" data-k="${i}" data-f="goal" value="${g.p.goal??''}"></label>`}<p class="note">${st.limbMode?'The doable score reflects how well the exercise matches your limb settings.':'Your progress is saved on this device, and synced when you sign in.'}</p></div>`:''}</div></article>`};
+  $('#grid').innerHTML=doable.length?doable.map(cardHTML).join(''):`<div class="empty"><p>Nothing matches that combination.</p><button class="lnk" id="reset">Clear muscle focus and add all gear</button></div>`;
+  $('#nd').innerHTML=(more.length?`<details id="gdd" class="nd"${gOpen?' open':''}><summary>Needs gear you haven’t selected (${more.length})</summary><div class="grid">${more.map(cardHTML).join('')}</div></details>`:'')+(nope.length?`<details id="ndd" class="nd"${ndOpen?' open':''}><summary>Not doable with your limb settings (${nope.length})</summary><div class="grid">${nope.map(cardHTML).join('')}</div></details>`:'');
+}
+
+const pick=el=>{const m=el.closest('[data-m]');if(m){st.sel=st.sel===m.dataset.m?null:m.dataset.m;render()}};
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.closest('[data-m]'))return pick(t);
+  if(t.closest('#clr')){st.sel=null;return render()}
+  const eb=t.closest('[data-e]');
+  if(eb&&!eb.disabled){const k=eb.dataset.e;st.eq.has(k)?st.eq.delete(k):st.eq.add(k);save();return render()}
+  if(t.closest('#none')){st.eq=new Set();save();return render()}
+  const lb=t.closest('[data-l]');
+  if(lb){st.a[lb.dataset.l]=+lb.dataset.v;save();render();if(st.sel&&!$('[data-m="'+st.sel+'"]')){st.sel=null;render()}return}
+  if(t.closest('#reset')){st.sel=null;st.q='';$('#q').value='';st.eq=new Set(['db','bb','kb','bd','pu','bn']);save();return render()}
+  const c=t.closest('.card');
+if(c&&!t.closest('.more,.gi')){
+  const k=+c.dataset.k;
+  const was=open.has(k);
+
+  open.clear();
+  if(!was)open.add(k);
+
+  render();
+
+  if(!was){
+    requestAnimationFrame(()=>{
+      const card=$(`.card[data-k="${k}"]`);
+      if(card){
+        card.scrollIntoView({
+          behavior:'smooth',
+          block:'center'
+        });
+      }
+    });
+  }
+}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;if(t.id==='q'){st.q=t.value;render();return}if(!t.dataset.f)return;
+  const w=W[+t.dataset.k];pr[w.n]={...pr[w.n],[t.dataset.f]:t.value===''?null:+t.value};save();
+  const g=prog(w),c=t.closest('.card');
+  c.querySelector('.bar i').style.width=(g.pct||0)+'%';c.querySelector('.pt').textContent=g.txt;c.querySelector('.pp').textContent=g.pct===null?'':g.pct+'%';
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const t=e.target;
+  if(t.matches('[data-m]')){e.preventDefault();pick(t)}else if(t.matches('.top')){e.preventDefault();t.click()}
+});
+document.addEventListener('mouseover',e=>{const h=$('#hint'),m=e.target.closest&&e.target.closest('[data-m]');if(h)h.textContent=m?MN[m.dataset.m]:'Tap a muscle to focus'});
+document.addEventListener('change',e=>{
+  if(e.target.id==='so'){
+    st.so=e.target.value;
+    render();
+    return;
+  }
+  if(e.target.id==='limbModeToggle'){
+    st.limbMode=e.target.checked;
+    if(!st.limbMode) st.a={aL:0,aR:0,lL:0,lR:0};
+    save();
+    render();
+  }
+});
+$('#so').innerHTML=Object.entries(SORTS).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('');
+document.addEventListener('toggle',e=>{if(e.target.id==='ndd')ndOpen=e.target.open;if(e.target.id==='gdd')gOpen=e.target.open},true);
+render();
+
+// Firebase authentication
+
+function authMessage(message) {
+  $('#authMessage').textContent = message;
+}
+
+function getAuthInputs() {
+  return {
+    email:$('#authEmail').value.trim(),
+    password:$('#authPassword').value
+  };
+}
+
+// Create account
+$('#signUpBtn').addEventListener('click',async () => {
+  const {email,password} = getAuthInputs();
+
+  if(!email || !password) {
+    return authMessage('Enter your email and password.');
+  }
+
+  if(password.length < 6) {
+    return authMessage('Your password must be at least 6 characters.');
+  }
+
+  try {
+    authMessage('Creating your account...');
+
+    await auth.createUserWithEmailAndPassword(email,password);
+
+    authMessage('Account created successfully!');
+  } catch(error) {
+    authMessage(error.message);
+  }
+});
+
+// Sign in
+$('#signInBtn').addEventListener('click',async () => {
+  const {email,password} = getAuthInputs();
+
+  if(!email || !password) {
+    return authMessage('Enter your email and password.');
+  }
+
+  try {
+    authMessage('Signing in...');
+
+    await auth.signInWithEmailAndPassword(email,password);
+
+    authMessage('Signed in successfully!');
+  } catch(error) {
+    authMessage(error.message);
+  }
+});
+
+// Sign out
+$('#accountToggle').addEventListener('click',async () => {
+  if(cloudUser){
+    try{await auth.signOut();$('#accountPanel').hidden=true;authMessage('You have signed out.')}catch(error){authMessage(error.message)}
+    return;
+  }
+  $('#accountPanel').hidden=!$('#accountPanel').hidden;
+});
+
+/* Sign out is handled by the header button. */
+/* $('#signOutBtn').addEventListener('click',async () => {
+  try {
+    await auth.signOut();
+    authMessage('You have signed out.');
+  } catch(error) {
+    authMessage(error.message);
+  }
+}); */
+
+// Watch authentication state
+auth.onAuthStateChanged(async user => {
+  cloudUser = user;
+
+  $('#authForms').hidden = !!user;
+  $('#signedIn').hidden = !user;
+  $('#accountToggle').textContent = user ? 'Sign out' : 'Sign in';
+  if(user) $('#accountPanel').hidden = true;
+
+  if(!user) {
+    $('#accountStatus').hidden = true;
+    $('#accountStatus').textContent = 'Not signed in';
+    $('#signedInEmail').textContent = '';
+    return;
+  }
+
+  $('#signedInEmail').textContent = user.email;
+  $('#accountStatus').hidden = false;
+  $('#accountStatus').textContent = 'Syncing…';
+
+  cloudLoading = true;
+
+  try {
+    const doc = await db.collection('users')
+      .doc(user.uid)
+      .get();
+
+    if(doc.exists) {
+      const data = doc.data();
+
+      st.eq = new Set(data.eq || []);
+      st.a = {...st.a,...(data.a || {})};
+      st.limbMode = data.limbMode !== undefined
+        ? !!data.limbMode
+        : Object.values(st.a).some(value => Number(value) > 0);
+      pr = data.pr || {};
+
+      persistLocal();
+
+      render();
+
+      authMessage('Your workout progress has been loaded.');
+    } else {
+      // First login: upload existing local progress
+      persistLocal();
+
+      authMessage('Welcome! Your existing progress is being saved.');
+    }
+
+    $('#accountStatus').textContent = 'Synced ✓';
+
+  } catch(error) {
+    console.error(error);
+
+    $('#accountStatus').textContent = 'Sync error';
+
+    authMessage(
+      'Unable to load your cloud progress: ' + error.message
+    );
+
+  } finally {
+    cloudLoading = false;
+  }
+
+  if(!$('#accountStatus').textContent.includes('error')) {
+    save();
+  }
+});
+</script>
+</body>
+</html>
